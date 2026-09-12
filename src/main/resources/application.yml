@@ -1,0 +1,22 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: hello-agent
+  ai:
+    openai:
+      # 通过环境变量配置 API Key；未配置也能启动，但对话时需要有效 Key
+      api-key: ${OPENAI_API_KEY:sk-placeholder}
+      # 任何 OpenAI 兼容服务均可，例如：
+      #   DeepSeek : https://api.deepseeek.com   (OPENAI_MODEL=deepseek-chat)
+      #   自定义代理/中转地址同样适用
+      base-url: ${OPENAI_BASE_URL:https://api.openai.com}
+      chat:
+        options:
+          model: ${OPENAI_MODEL:gpt-4o-mini}
+          temperature: 0.6
+
+logging:
+  level:
+    com.example.agent: INFO
