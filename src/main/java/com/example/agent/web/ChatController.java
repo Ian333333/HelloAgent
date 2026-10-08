@@ -1,6 +1,7 @@
 package com.example.agent.web;
 
 import com.example.agent.agent.Agent;
+import com.example.agent.agent.AgentReply;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,7 +24,7 @@ public class ChatController {
     public ChatResponse chat(@Valid @RequestBody ChatRequest request) {
         String sessionId = (request.sessionId() == null || request.sessionId().isBlank())
                 ? DEFAULT_SESSION : request.sessionId();
-        String reply = agent.chat(sessionId, request.message());
-        return new ChatResponse(sessionId, reply);
+        AgentReply reply = agent.chat(sessionId, request.message());
+        return new ChatResponse(sessionId, reply.content(), reply.agent());
     }
 }

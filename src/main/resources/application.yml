@@ -11,10 +11,10 @@ spring:
       # 任何 OpenAI 兼容服务均可，例如：
       #   DeepSeek : https://api.deepseeek.com   (OPENAI_MODEL=deepseek-chat)
       #   自定义代理/中转地址同样适用
-      base-url: ${OPENAI_BASE_URL:https://api.openai.com}
+      base-url: ${OPENAI_BASE_URL:https://maas.qianwenaiapi.com/compatible-mode}
       chat:
         options:
-          model: ${OPENAI_MODEL:gpt-4o-mini}
+          model: ${OPENAI_MODEL:qwen3.7-flash}
           temperature: 0.6
 
 logging:

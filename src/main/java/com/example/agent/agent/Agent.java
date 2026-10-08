@@ -10,7 +10,7 @@ public interface Agent {
      *
      * @param sessionId 会话 ID，相同 ID 共享上下文记忆；为空则使用 default
      * @param message   用户输入
-     * @return Agent 回复
+     * @return Agent 回复（内容 + 处理链路）
      */
-    String chat(String sessionId, String message);
+    AgentReply chat(String sessionId, String message);
 }
