@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HelloAgent (LangChain4j)</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+            background: #f0f2f5;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+        }
+        .app {
+            width: 100%;
+            max-width: 720px;
+            background: #fff;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        header {
+            padding: 16px 20px;
+            background: #16a34a;
+            color: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+        header h1 { font-size: 18px; }
+        header span { font-size: 12px; opacity: .8; }
+        .messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+        .msg { max-width: 80%; padding: 10px 14px; border-radius: 12px; line-height: 1.6; white-space: pre-wrap; word-break: break-word; }
+        .msg.user { align-self: flex-end; background: #16a34a; color: #fff; border-bottom-right-radius: 4px; }
+        .msg.bot { align-self: flex-start; background: #f1f3f5; color: #212529; border-bottom-left-radius: 4px; }
+        .route { align-self: flex-start; font-size: 11px; color: #6b7280; margin: -6px 0 0 4px; }
+        .composer { display: flex; gap: 8px; padding: 12px 16px; border-top: 1px solid #e5e7eb; }
+        .composer input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+        }
+        .composer input:focus { border-color: #16a34a; }
+        .composer button {
+            padding: 10px 20px;
+            background: #16a34a;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .composer button:disabled { background: #86efac; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+<div class="app">
+    <header>
+        <h1>HelloAgent (LangChain4j)</h1>
+        <span id="session"></span>
+    </header>
+    <div id="messages" class="messages">
+        <div class="msg bot">你好！我是 HelloAgent（LangChain4j 版），可以查时间、做计算、查天气。试试问我：“北京现在天气怎么样？”</div>
+    </div>
+    <form id="form" class="composer">
+        <input id="input" placeholder="输入消息，例如：查北京天气，再算算气温和 0 度相差多少" autocomplete="off" required>
+        <button id="sendBtn" type="submit">发送</button>
+    </form>
+</div>
+<script>
+    const sessionId = localStorage.getItem('agent-session-l4j')
+        || ('sess-' + Math.random().toString(36).slice(2, 10));
+    localStorage.setItem('agent-session-l4j', sessionId);
+    document.getElementById('session').textContent = '会话: ' + sessionId;
+
+    const form = document.getElementById('form');
+    const input = document.getElementById('input');
+    const sendBtn = document.getElementById('sendBtn');
+    const messages = document.getElementById('messages');
+
+    function addMessage(text, who) {
+        const div = document.createElement('div');
+        div.className = 'msg ' + who;
+        div.textContent = text;
+        messages.appendChild(div);
+        messages.scrollTop = messages.scrollHeight;
+    }
+
+    function addRoute(chain) {
+        const div = document.createElement('div');
+        div.className = 'route';
+        div.textContent = '编排链路: ' + chain;
+        messages.appendChild(div);
+        messages.scrollTop = messages.scrollHeight;
+    }
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const text = input.value.trim();
+        if (!text) return;
+        addMessage(text, 'user');
+        input.value = '';
+        sendBtn.disabled = true;
+        try {
+            const resp = await fetch('/api/agent/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ sessionId, message: text })
+            });
+            if (!resp.ok) throw new Error('HTTP ' + resp.status);
+            const data = await resp.json();
+            addMessage(data.reply, 'bot');
+            if (data.agent) addRoute(data.agent);
+        } catch (err) {
+            addMessage('请求失败：' + err.message, 'bot');
+        } finally {
+            sendBtn.disabled = false;
+            input.focus();
+        }
+    });
+</script>
+</body>
+</html>

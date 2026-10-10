@@ -1,0 +1,22 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: hello-agent-langchain4j
+
+langchain4j:
+  open-ai:
+    # OpenAI 兼容服务的公共配置；模型 Bean 名为 openAiChatModel
+    # 通过环境变量配置 API Key；未配置也能启动，但对话时需要有效 Key
+    chat-model:
+      # LangChain4j 的 OpenAI 客户端会在 base-url 后拼接 /chat/completions，
+      # OpenAI 兼容网关通常需要 /v1 后缀（实测按需调整）
+      base-url: ${OPENAI_BASE_URL:https://maas.qianwenaiapi.com/compatible-mode/v1}
+      api-key: ${OPENAI_API_KEY:sk-placeholder}
+      model-name: ${OPENAI_MODEL:qwen3.7-flash}
+      temperature: 0.6
+
+logging:
+  level:
+    com.example.l4j: INFO
