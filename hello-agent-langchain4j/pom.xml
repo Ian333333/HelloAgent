@@ -37,6 +37,13 @@
             <version>${langchain4j.version}</version>
         </dependency>
 
+        <!-- RAG：本地 ONNX 中文 embedding 模型（约 95MB，无需 API Key、离线推理） -->
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j-embeddings-bge-small-zh-v15</artifactId>
+            <version>${langchain4j.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>

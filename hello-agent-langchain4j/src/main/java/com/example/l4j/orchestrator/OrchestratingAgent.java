@@ -2,6 +2,7 @@ package com.example.l4j.orchestrator;
 
 import com.example.l4j.assistant.DateTimeAssistant;
 import com.example.l4j.assistant.GeneralAssistant;
+import com.example.l4j.assistant.KnowledgeAssistant;
 import com.example.l4j.assistant.MathAssistant;
 import com.example.l4j.assistant.RouterAssistant;
 import com.example.l4j.assistant.WeatherAssistant;
@@ -33,7 +34,7 @@ public class OrchestratingAgent {
     private static final int MAX_STEPS = 3;
 
     /** 允许的专家名，与 specialists 注册表一一对应。 */
-    private static final Set<String> ALLOWED = Set.of("general", "math", "weather", "datetime");
+    private static final Set<String> ALLOWED = Set.of("general", "math", "weather", "datetime", "knowledge");
 
     /** 统一的专家签名（各 Assistant 接口的方法引用都满足它）。 */
     private interface Specialist {
@@ -49,14 +50,16 @@ public class OrchestratingAgent {
                               GeneralAssistant generalAssistant,
                               MathAssistant mathAssistant,
                               WeatherAssistant weatherAssistant,
-                              DateTimeAssistant dateTimeAssistant) {
+                              DateTimeAssistant dateTimeAssistant,
+                              KnowledgeAssistant knowledgeAssistant) {
         this.router = router;
         this.generalAssistant = generalAssistant;
         this.specialists = Map.of(
                 "general", generalAssistant::chat,
                 "math", mathAssistant::chat,
                 "weather", weatherAssistant::chat,
-                "datetime", dateTimeAssistant::chat);
+                "datetime", dateTimeAssistant::chat,
+                "knowledge", knowledgeAssistant::chat);
     }
 
     public AgentReply chat(String sessionId, String message) {

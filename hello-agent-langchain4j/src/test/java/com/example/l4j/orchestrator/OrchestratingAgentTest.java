@@ -2,6 +2,7 @@ package com.example.l4j.orchestrator;
 
 import com.example.l4j.assistant.DateTimeAssistant;
 import com.example.l4j.assistant.GeneralAssistant;
+import com.example.l4j.assistant.KnowledgeAssistant;
 import com.example.l4j.assistant.MathAssistant;
 import com.example.l4j.assistant.RouterAssistant;
 import com.example.l4j.assistant.WeatherAssistant;
@@ -41,10 +42,12 @@ class OrchestratingAgentTest {
     private WeatherAssistant weatherAssistant;
     @Mock
     private DateTimeAssistant dateTimeAssistant;
+    @Mock
+    private KnowledgeAssistant knowledgeAssistant;
 
     private OrchestratingAgent orchestrator() {
         return new OrchestratingAgent(router, generalAssistant, mathAssistant,
-                weatherAssistant, dateTimeAssistant);
+                weatherAssistant, dateTimeAssistant, knowledgeAssistant);
     }
 
     @Test
@@ -120,5 +123,33 @@ class OrchestratingAgentTest {
         assertThat(reply.content()).isEqualTo("通用回复");
         assertThat(reply.agent()).isEqualTo("general");
         verify(generalAssistant).chat(SID, MESSAGE);
+    }
+
+    @Test
+    void 知识问答_直通knowledge专家() {
+        String question = "HelloAgent 项目有几个模块？";
+        when(router.route(question)).thenReturn(new Routes(List.of("knowledge")));
+        when(knowledgeAssistant.chat(SID, question)).thenReturn("项目包含两个模块：springai 和 langchain4j");
+
+        AgentReply reply = orchestrator().chat(SID, question);
+
+        assertThat(reply.content()).contains("两个模块");
+        assertThat(reply.agent()).isEqualTo("knowledge");
+        verify(knowledgeAssistant, times(1)).chat(SID, question);
+    }
+
+    @Test
+    void 知识加计算_流水线传递知识结果() {
+        String question = "项目记忆窗口是多大？再算一下它的 5 倍";
+        when(router.route(question)).thenReturn(new Routes(List.of("knowledge", "math")));
+        when(knowledgeAssistant.chat(SID, question)).thenReturn("记忆窗口保留最近 20 条消息");
+        when(mathAssistant.chat(eq(SID), anyString())).thenReturn("100 条");
+
+        AgentReply reply = orchestrator().chat(SID, question);
+
+        assertThat(reply.agent()).isEqualTo("knowledge -> math");
+        ArgumentCaptor<String> mathInput = ArgumentCaptor.forClass(String.class);
+        verify(mathAssistant).chat(eq(SID), mathInput.capture());
+        assertThat(mathInput.getValue()).contains(question).contains("20");
     }
 }

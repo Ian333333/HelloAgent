@@ -19,6 +19,7 @@ public interface RouterAssistant {
             - weather：查询天气、气温、湿度、风速等
             - math：数学计算
             - datetime：当前日期、时间、星期几
+            - knowledge：HelloAgent 项目知识、文档问答、与本项目架构/功能相关的问题（如"这个项目有几个模块"）
             - general：其他闲聊、常识问答、写作等
             规则：
             - 若消息包含多个任务，按依赖顺序全部列出，例如"查北京天气再算温差"输出 ["weather","math"]
